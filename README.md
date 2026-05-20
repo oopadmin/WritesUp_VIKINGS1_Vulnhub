@@ -156,7 +156,7 @@ Finished
 
 Chúng ta thiết lập cấu hình đường dẫn mục tiêu, số lượng luồng (Threads) và nạp danh sách từ khóa tương ứng. Sau quá trình rà quét, DirBuster trả về danh sách cấu trúc các đường dẫn ẩn được tìm thấy:
 ![one](./images/one.jpg)
-![[two 1.jpg]]
+![two](./images/two.jpg)
 > 💡 **Phân tích kết quả:** Qua quá trình dò quét thư mục, chúng ta phát hiện ra một đường dẫn ẩn cực kỳ giá trị: **`http://192.168.56.102/site/war/`**.
 
 ## ⚡ 5. Phase 4: ZIP Password Cracking 
@@ -247,7 +247,7 @@ Kết quả `king` là 1 file ảnh jpeg:
 ```
 king: JPEG image data, Exif standard: [TIFF image data, big-endian, direntries=14, width=6000, height=4000, bps=0, PhotometricInterpretation=RGB, description=Viking ships on the water under the sunlight and dark storm. Invasion in the storm. 3D illustration.; Shutterstock ID 100901071, orientation=upper-left], baseline, precision 8, 1600x1067, components 3
 ```
-![[three.jpg]]
+![three](./images/three.jpg)
 >Mô tả: *"Những chiến thuyền Viking rẽ sóng ra khơi, tắm mình trong ánh nắng rực rỡ trước thềm giông bão ngợp trời."*
 ### Bước 2: Khai quật dữ liệu ẩn sâu bằng Binwalk
 
@@ -366,7 +366,7 @@ print(*res)
 
 > 💡 **Mẹo xử lý nhanh:** Bạn có thể sao chép mảng kết quả số thô thu được từ đoạn code Python trên rồi ném vào công cụ trực tuyến **CyberChef** để dịch nhanh toàn bộ chuỗi số đó sang dạng ký tự.
 
-![[four.jpg]]
+![four](./images/four.jpg)
 
 🎉 **Mật khẩu ragnar tìm được là:** **`mR)|>^/Gky[gz=\.F#j5P(`**
 
@@ -730,7 +730,7 @@ lxc image import ./alpine-v3.23-x86_64-20260520_0615.tar.gz --alias myimage
 lxd init
 ```
 
-![[six 1.jpg]]
+![six](./images/six.jpg)
 
 > ⚠️ **Chú ý cấu hình:** Chọn **NO** ở câu hỏi `would you like to create a new local network bridge?`, các thông số còn lại giữ mặc định để tránh lỗi linh tinh:(
 
