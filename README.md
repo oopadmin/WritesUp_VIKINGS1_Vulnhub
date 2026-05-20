@@ -155,7 +155,7 @@ Finished
 #### Cách 2: Sử dụng DirBuster (Giao diện đồ họa - GUI)
 
 Chúng ta thiết lập cấu hình đường dẫn mục tiêu, số lượng luồng (Threads) và nạp danh sách từ khóa tương ứng. Sau quá trình rà quét, DirBuster trả về danh sách cấu trúc các đường dẫn ẩn được tìm thấy:
-![[/images/one.jpg]]
+![one](./images/one.jpg)
 ![[two 1.jpg]]
 > 💡 **Phân tích kết quả:** Qua quá trình dò quét thư mục, chúng ta phát hiện ra một đường dẫn ẩn cực kỳ giá trị: **`http://192.168.56.102/site/war/`**.
 
