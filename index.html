@@ -5,18 +5,316 @@
   <title>My CTF Write-ups</title>
   <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0">
+  
   <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/docsify@4/lib/themes/vue.css">
+
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/prism-themes@1.9.0/themes/prism-one-dark.min.css">
+
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Great+Vibes&display=swap">
+  
+  <style>
+  /* Cấu trúc chung cho các dòng highlight */
+  .custom-line-highlight-green, 
+  .custom-line-highlight-red, 
+  .custom-line-highlight-yellow {
+    display: block;
+    width: 100%;
+    margin-left: -1em;
+    padding-left: 1em;
+  }
+
+  /* Màu Xanh Lá (Green) - Mặc định hoặc dùng chữ 'g' */
+  .custom-line-highlight-green {
+    background-color: rgba(40, 167, 69, 0.25) !important;
+    border-left: 5px solid #28a745;
+  }
+
+  /* Màu Đỏ (Red) - Dùng chữ 'r' */
+  .custom-line-highlight-red {
+    background-color: rgba(220, 53, 69, 0.25) !important;
+    border-left: 5px solid #dc3545;
+  }
+
+  /* Màu Vàng (Yellow) - Dùng chữ 'y' */
+  .custom-line-highlight-yellow {
+    background-color: rgba(255, 193, 7, 0.25) !important;
+    border-left: 5px solid #ffc107;
+  }
+
+  pre[data-lang] code {
+    padding: 1em !important;
+  }
+
+  pre[class*="language-"], code[class*="language-"] {
+      font-weight: 600 !important;
+      line-height: 1.6 !important;
+      font-family: "Consolas", "Monaco", monospace !important;
+    }
+
+    /* --- TỰ NHUỘM MÀU RỰC RỠ CHO C --- */
+    /* Màu cho các chỉ thị tiền xử lý: #include, #define */
+    .token.macro, .token.property {
+      color: #c678dd !important; /* Tím đậm */
+    }
+    .token.string {
+      color: #98c379 !important; /* Xanh lá cây dịu (cho tên file "stdio.h" hoặc chuỗi chữ) */
+    }
+
+    /* Màu cho từ khóa cấu trúc: if, else, while, return, for */
+    .token.keyword {
+      color: #e06c75 !important; /* Đỏ hồng rực */
+    }
+
+    /* Màu cho kiểu dữ liệu: int, char, void, float, struct */
+    .token.class-name, .token.builtin {
+      color: #e5c07b !important; /* Vàng nghệ đặc trưng */
+    }
+
+    /* Màu cho các hàm: printf, scanf, main, hoặc hàm bạn tự tạo */
+    .token.function {
+      color: #61afef !important; /* Xanh dương rực sáng */
+    }
+
+    /* Màu cho các con số (0, 1, 100) */
+    .token.number {
+      color: #d19a66 !important; /* Cam ấm */
+    }
+
+    /* Màu cho các toán tử (+, -, =, ==, &, *) */
+    .token.operator {
+      color: #56b6c2 !important; /* Xanh ngọc sành điệu */
+    }
+
+    .signature-container {
+    text-align: right;       /* Đẩy chữ ký sang góc phải cuối bài */
+    margin-top: 50px;         /* Tạo khoảng cách rộng rãi với nội dung phía trên */
+    padding-right: 20px;
+  }
+
+  .cyber-signature {
+    font-family: 'Great Vibes', cursive !important;
+    font-size: 75pt !important;         /* Cỡ chữ siêu to khổng lồ */
+    font-weight: bold !important;
+    color: #ffffff !important;          /* Lõi chữ màu trắng để làm nổi bật hiệu ứng glow */
+    text-decoration: none !important;
+    display: inline-block;
+    transition: all 0.3s ease;
+    
+    /* Hiệu ứng Glow màu xanh biển hơi đậm (kết hợp nhiều lớp bóng để tỏa sáng đều) */
+    text-shadow: 
+      0 0 7px #0055ff,
+      0 0 10px #0055ff,
+      0 0 21px #0055ff,
+      0 0 42px #0022aa,
+      0 0 82px #0022aa;
+  }
+
+  /* Hiệu ứng tăng cường độ phát sáng và hơi phóng to nhẹ khi rê chuột vào */
+  .cyber-signature:hover {
+    transform: scale(1.05);
+    text-shadow: 
+      0 0 10px #00c6ff,
+      0 0 20px #0055ff,
+      0 0 30px #0055ff,
+      0 0 60px #0022aa,
+      0 0 100px #0022aa;
+  }
+</style>
+<style>
+  /* Container tổng thể phong cách Terminal */
+  .cyber-hacker-box {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    margin-top: 60px;
+    margin-bottom: 40px;
+    background: #0d0e15; /* Nền xám đen cực sâu của terminal xịn */
+    padding: 40px;
+    border-radius: 8px;
+    border: 1px solid #1f2438;
+    position: relative;
+    overflow: hidden;
+  }
+
+  /* Tạo các đường kẻ quét màn hình CRT (Scanlines) chạy ngầm */
+  .cyber-hacker-box::before {
+    content: " ";
+    display: block;
+    position: absolute;
+    top: 0; left: 0; bottom: 0; right: 0;
+    background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
+    z-index: 2;
+    background-size: 100% 3px, 6px 100%;
+    pointer-events: none;
+  }
+
+  /* Cấu hình chữ LINES - UP phong cách Matrix / Glitch */
+  .hacker-text {
+    font-family: 'Courier New', Courier, monospace !important; /* Font chữ terminal kinh điển */
+    font-size: 55pt !important;
+    font-weight: 900 !important;
+    color: #cbd5e1; /* Màu chữ trắng xám cơ khí */
+    letter-spacing: 12px;
+    position: relative;
+    text-transform: uppercase;
+    margin: 0;
+    padding: 0;
+    
+    /* Gọi hiệu ứng Glitch lặp đi lặp lại */
+    animation: hackerGlitch 4s linear infinite;
+  }
+
+  /* Tạo lớp bóng giả lập lỗi tách kênh màu kỹ thuật số (RGB Split) */
+  .hacker-text::before,
+  .hacker-text::after {
+    content: "LINES - UP";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: #0d0e15;
+  }
+
+  /* Lớp nhiễu màu xanh cyan */
+  .hacker-text::before {
+    left: 3px;
+    text-shadow: -2px 0 #00ffff;
+    clip: rect(44px, 450px, 56px, 0);
+    animation: glitchAnim1 3s infinite linear alternate-reverse;
+  }
+
+  /* Lớp nhiễu màu đỏ tía */
+  .hacker-text::after {
+    left: -3px;
+    text-shadow: -2px 0 #ff0055;
+    clip: rect(85px, 450px, 140px, 0);
+    animation: glitchAnim2 2s infinite linear alternate-reverse;
+  }
+
+  /* Subtitle tên máy */
+  .hacker-sub {
+    margin-top: 25px;
+    font-family: monospace;
+    font-size: 13pt;
+    color: #475569; /* Màu xám nòng súng */
+    letter-spacing: 4px;
+    border-right: 2px solid #64748b; /* Hiệu ứng con trỏ nhấp nháy */
+    white-space: nowrap;
+    overflow: hidden;
+    animation: typing 3s steps(30, end), blink-caret 0.75s step-end infinite;
+  }
+
+  /* --- Các hiệu ứng Animation --- */
+  
+  /* Lắc chữ ngẫu nhiên */
+  @keyframes hackerGlitch {
+    0%, 95%, 100% { transform: skew(0deg); }
+    96% { transform: skew(-6deg); }
+    97% { transform: skew(8deg); }
+    98% { transform: skew(-2deg); }
+    99% { transform: skew(4deg); }
+  }
+
+  /* Cắt lát chữ ngẫu nhiên tầng 1 */
+  @keyframes glitchAnim1 {
+    0% { clip: rect(20px, 9999px, 60px, 0); }
+    20% { clip: rect(100px, 9999px, 115px, 0); }
+    40% { clip: rect(10px, 9999px, 35px, 0); }
+    60% { clip: rect(80px, 9999px, 95px, 0); }
+    80% { clip: rect(40px, 9999px, 50px, 0); }
+    100% { clip: rect(120px, 9999px, 140px, 0); }
+  }
+
+  /* Cắt lát chữ ngẫu nhiên tầng 2 */
+  @keyframes glitchAnim2 {
+    0% { clip: rect(70px, 9999px, 105px, 0); }
+    25% { clip: rect(15px, 9999px, 55px, 0); }
+    50% { clip: rect(130px, 9999px, 145px, 0); }
+    75% { clip: rect(30px, 9999px, 75px, 0); }
+    100% { clip: rect(90px, 9999px, 125px, 0); }
+  }
+
+  /* Hiệu ứng gõ chữ tự động (Typing Effect) cho Subtitle */
+  @keyframes typing {
+    from { width: 0 }
+    to { width: 100% }
+  }
+
+  /* Con trỏ nhấp nháy _ */
+  @keyframes blink-caret {
+    from, to { border-color: transparent }
+    50% { border-color: #64748b; }
+  }
+</style>
 </head>
 <body>
   <div id="app">Đang tải tài liệu...</div>
+  
   <script>
-    window.$docsify = {
-      name: 'CTF Notes', // Tên hiển thị ở thanh bên
-      repo: '',          // Đường dẫn GitHub của bạn (nếu muốn hiện góc phải)
-      loadSidebar: false, // Bật tính năng menu thanh bên (Tùy chọn)
-      auto2top: true     // Tự động cuộn lên đầu trang khi đổi bài
-    }
-  </script>
+  window.$docsify = {
+    name: 'CTF Notes',
+    repo: '',
+    loadSidebar: false,
+    auto2top: true,
+    
+    plugins: [
+      function(hook, vm) {
+        hook.doneEach(function() {
+          document.querySelectorAll('pre[data-lang]').forEach(function(pre) {
+            const langAttr = pre.getAttribute('data-lang');
+            const match = langAttr.match(/\{([^}]+)\}/);
+            
+            if (match) {
+              // Tạo một object để lưu cấu hình: { "5": "green", "10": "red" }
+              const lineStyles = {};
+              
+              // Duyệt qua từng phần tử được khai báo trong dấu {}
+              match[1].split(',').forEach(item => {
+                const trimmed = item.trim();
+                // Phân tích cú pháp xem có ký tự màu (r, g, y) ở đầu không
+                const colorMatch = trimmed.match(/^([rgy])(\d+)$/);
+                
+                if (colorMatch) {
+                  const colorCode = colorMatch[1];
+                  const lineNum = colorMatch[2];
+                  if (colorCode === 'r') lineStyles[lineNum] = 'red';
+                  else if (colorCode === 'y') lineStyles[lineNum] = 'yellow';
+                  else lineStyles[lineNum] = 'green';
+                } else {
+                  // Nếu chỉ gõ số thuần túy (ví dụ {5}), mặc định là màu xanh lá (green)
+                  if (!isNaN(trimmed)) {
+                    lineStyles[trimmed] = 'green';
+                  }
+                }
+              });
+
+              const codeElement = pre.querySelector('code');
+              const lines = codeElement.innerHTML.split('\n');
+              
+              const highlightedLines = lines.map((lineContent, index) => {
+                const lineNumber = index + 1;
+                // Kiểm tra xem dòng này có yêu cầu highlight không
+                if (lineStyles[lineNumber]) {
+                  const color = lineStyles[lineNumber];
+                  return `<span class="custom-line-highlight-${color}">${lineContent}</span>`;
+                }
+                return lineContent;
+              });
+              
+              codeElement.innerHTML = highlightedLines.join('\n');
+            }
+          });
+        });
+      }
+    ]
+  }
+</script>
+  
   <script src="//cdn.jsdelivr.net/npm/docsify@4"></script>
+  
+  <script src="//cdn.jsdelivr.net/npm/prismjs@1/components/prism-bash.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/prismjs@1/components/prism-python.min.js"></script>
 </body>
 </html>

